@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+:root {
+  /* Main theme colors */
+  --primary: #FF6B6B;
+  --primary-dark: #FF5252;
+  --secondary: #4ECDC4;
+  --secondary-dark: #45B7AF;
+  --accent: #FFE66D;
+  --accent-dark: #FFD93D;
+  --background: #F7F9FC;
+  --foreground: #2D3436;
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  
+  /* Input styles */
+  --input-bg: #FFFFFF;
+  --input-text: #2D3436;
+  --input-border: #E2E8F0;
+  --input-focus: #4ECDC4;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #45B7AF 100%);
+  --gradient-accent: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+  --gradient-background: linear-gradient(135deg, #F7F9FC 0%, #EDF2F7 100%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1A1B1E;
+    --foreground: #F7F9FC;
+    --card-bg: #2D3436;
+    --card-border: #4A5568;
+    
+    --input-bg: #2D3436;
+    --input-text: #F7F9FC;
+    --input-border: #4A5568;
+    --input-focus: #4ECDC4;
+    
+    --gradient-background: linear-gradient(135deg, #1A1B1E 0%, #2D3436 100%);
+  }
+}
+
+body {
+  min-height: 100vh;
+  background: var(--gradient-background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  position: relative;
+}
+
+/* Modern card styles */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Button styles */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-secondary {
+  background: var(--gradient-secondary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+/* Form styles */
+input, select, textarea {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 2px solid var(--input-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+}
+
+/* Meme text styling */
+.meme-text {
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-shadow: 
+    2px 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    0 2px 0 #000,
+    2px 0 0 #000,
+    0 -2px 0 #000,
+    -2px 0 0 #000;
+}
+
+/* Fun decorative elements */
+.fun-border {
+  position: relative;
+}
+
+.fun-border::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: var(--gradient-accent);
+  border-radius: 1rem;
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.fun-border:hover::before {
+  opacity: 0.8;
+}
+
+/* Loading animation */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.loading-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
