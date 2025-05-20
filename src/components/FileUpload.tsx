@@ -122,7 +122,7 @@ export default function FileUpload() {
               }
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              PNG, JPG, GIF jusqu'à 5MB
+              PNG, JPG, GIF jusqu&apos;à 5MB
             </p>
           </div>
         </div>

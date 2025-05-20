@@ -384,12 +384,11 @@ export default function MemeEditor() {
             url: imageUrl,
           });
           return;
-        } catch (err) {
+        } catch {
           // If Web Share API fails, fall back to custom share modal
           console.log('Web Share API failed, falling back to custom share modal');
         }
       }
-
       // Fall back to custom share modal
       setShareUrl(imageUrl);
       setIsShareModalOpen(true);
