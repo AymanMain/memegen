@@ -1,30 +1,95 @@
 {
   "pages": {
+    "/_not-found/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/app/_not-found/page-d7865626cf1c7c46.js"
+    ],
     "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/css/8e0eaf367fe3d585.css",
+      "static/chunks/app/layout-da0e1e26a093edb1.js"
     ],
-    "/editor/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/editor/page.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/api/imgur/upload/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/imgur/upload/route.js"
+    "/api/imgur/delete/route": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/app/api/imgur/delete/route-f24784c69f2c979e.js"
     ],
     "/api/proxy/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/proxy/route.js"
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/app/api/proxy/route-636278bb0fa2fd7f.js"
+    ],
+    "/api/imgur/upload/route": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/app/api/imgur/upload/route-56b98064e4927899.js"
+    ],
+    "/auth/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/bc9e92e6-b34a0e9ac3f8601a.js",
+      "static/chunks/895f99fe-daca41c9dfafb362.js",
+      "static/chunks/929-02172b4bd38d85b7.js",
+      "static/chunks/app/auth/page-c51e5dc87e0b9073.js"
+    ],
+    "/gallery/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/bc9e92e6-b34a0e9ac3f8601a.js",
+      "static/chunks/895f99fe-daca41c9dfafb362.js",
+      "static/chunks/929-02172b4bd38d85b7.js",
+      "static/chunks/655-7ba4b81033c54acc.js",
+      "static/chunks/app/gallery/page-d3c1d927455aa6be.js"
+    ],
+    "/meme/[id]/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/bc9e92e6-b34a0e9ac3f8601a.js",
+      "static/chunks/895f99fe-daca41c9dfafb362.js",
+      "static/chunks/929-02172b4bd38d85b7.js",
+      "static/chunks/31-f1ce4d2d69081f9a.js",
+      "static/chunks/app/meme/[id]/page-59833305e60f1d13.js"
+    ],
+    "/editor/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/bc9e92e6-b34a0e9ac3f8601a.js",
+      "static/chunks/895f99fe-daca41c9dfafb362.js",
+      "static/chunks/929-02172b4bd38d85b7.js",
+      "static/chunks/952-bd299d1cc7a0a325.js",
+      "static/chunks/app/editor/page-013efee1e9d912b1.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-857283a7f05cdd87.js",
+      "static/chunks/4bd1b696-d6272f31e3469fc3.js",
+      "static/chunks/303-de819a0b0b02283e.js",
+      "static/chunks/main-app-9b7ba43f02964444.js",
+      "static/chunks/bc9e92e6-b34a0e9ac3f8601a.js",
+      "static/chunks/895f99fe-daca41c9dfafb362.js",
+      "static/chunks/929-02172b4bd38d85b7.js",
+      "static/chunks/952-bd299d1cc7a0a325.js",
+      "static/chunks/821-1d8fc2053b7f7c3c.js",
+      "static/chunks/app/page-7dccb11c078320a7.js"
     ]
   }
 }
