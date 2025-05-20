@@ -10,12 +10,12 @@ Une application web moderne permettant de créer, modifier et partager des memes
   - Ajout et personnalisation de texte
   - Édition en temps réel avec aperçu instantané
   - Partage du meme
-  ~ Sauvegarde des mèmes dans votre galerie
+  - ~ Sauvegarde des mèmes dans votre galerie
 
 - **Sécurité**
   - Authentification sécurisée
   - Protection des données utilisateur
-  ~ Stockage sécurisé des images 
+  - ~ Stockage sécurisé des images 
 
 ## 🚀 Technologies
 
