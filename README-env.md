@@ -44,6 +44,13 @@ NODE_ENV=development
 - En développement, gardez ces valeurs par défaut
 - En production, mettez à jour `NEXT_PUBLIC_APP_URL` avec votre URL de production
 
+### Imgur
+```env
+NEXT_PUBLIC_IMGUR_CLIENT_ID=votre_client_id
+```
+- Obtenez votre Client ID depuis https://api.imgur.com/oauth2/addclient
+- Créez une application non authentifiée pour obtenir le Client ID
+
 ### Limites d'Upload
 ```env
 NEXT_PUBLIC_MAX_FILE_SIZE=5242880

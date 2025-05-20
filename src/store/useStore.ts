@@ -12,6 +12,7 @@ export interface MemeTemplate {
   id: string;
   name: string;
   imageUrl: string;
+  deleteHash?: string;  // Imgur delete hash for image deletion
   createdAt: Date;
   createdBy: string;
 }

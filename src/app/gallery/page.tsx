@@ -8,7 +8,7 @@ import MemeGrid from '@/components/MemeGrid';
 import { MemeTemplate } from '@/store/useStore';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { deleteFile } from '@/lib/supabase';
+import { deleteFileFromImgur } from '@/lib/imgur';
 
 export default function GalleryPage() {
   const router = useRouter();
@@ -72,9 +72,11 @@ export default function GalleryPage() {
       const memeToDelete = memes.find((m) => m.id === id);
       if (!memeToDelete) return;
 
-      // Supprimer l'image du stockage Supabase
-      const filePath = `${user.uid}/${id}`;
-      await deleteFile(filePath);
+      // Extraire le deleteHash de l'URL Imgur (stocké dans Firestore)
+      const deleteHash = memeToDelete.deleteHash;
+      if (deleteHash) {
+        await deleteFileFromImgur(deleteHash);
+      }
 
       // Supprimer le document de la base de données
       await deleteDoc(doc(db, 'memes', id));

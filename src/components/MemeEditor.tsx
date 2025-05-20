@@ -9,7 +9,7 @@ import { Download, Save, Share2, Type, Image as ImageIcon } from 'lucide-react';
 import TextControls from './TextControls';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { uploadFile, getPublicUrl } from '@/lib/supabase';
+import { uploadFileToImgur } from '@/lib/imgur';
 
 // Types pour les éléments de texte
 interface TextElement {
@@ -162,16 +162,22 @@ export default function MemeEditor() {
       // Générer un nom unique pour le mème
       const memeId = Date.now().toString();
       const memeName = `Mème ${new Date().toLocaleDateString('fr-FR')}`;
-      const filePath = `${user.uid}/${memeId}`;
 
-      // Upload de l'image dans Supabase Storage
-      await uploadFile(blob, filePath);
-      const imageUrl = getPublicUrl(filePath);
+      // Upload de l'image dans Imgur
+      const { url: imageUrl, deleteHash, error: uploadError } = await uploadFileToImgur(
+        blob,
+        memeName
+      );
+
+      if (uploadError) {
+        throw uploadError;
+      }
 
       // Sauvegarder les métadonnées dans Firestore
       const memeData = {
         name: memeName,
         imageUrl,
+        deleteHash,
         createdAt: serverTimestamp(),
         createdBy: user.uid,
         textElements: textElements.map(({ id, ...element }) => element), // Exclure l'ID local

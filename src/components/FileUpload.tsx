@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Image as ImageIcon, AlertCircle } from 'lucide-react';
-import { uploadFileToSupabase } from '@/lib/supabase';
+import { uploadFileToImgur } from '@/lib/imgur';
 import { useAuth } from '@/lib/firebase';
 
 export default function FileUpload() {
@@ -38,10 +38,9 @@ export default function FileUpload() {
     setError(null);
 
     try {
-      const { url, error: uploadError } = await uploadFileToSupabase(
+      const { url, error: uploadError } = await uploadFileToImgur(
         file,
-        'memes',
-        user.uid
+        `Meme by ${user.displayName || user.uid}`
       );
 
       if (uploadError) {

@@ -7,7 +7,10 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ['tnsetzwoaxcddbkstmng.supabase.co'],
+    domains: [
+      'i.imgur.com',  // Imgur image URLs
+      'imgur.com',    // Imgur website
+    ],
   },
 }
 
