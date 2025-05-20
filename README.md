@@ -1,14 +1,15 @@
 # 🎨 Générateur de Mèmes
 
-Une application web moderne permettant de créer, modifier et partager des mèmes facilement.
+Une application web moderne permettant de créer, modifier et partager des memes facilement.
+[Lien de l'Application](https://memegen-ncpm.vercel.app/)
 
 ## ✨ Fonctionnalités Implémentées
 
-- **Création de Mèmes**
+- **Création de Memes**
   - Upload d'images depuis votre ordinateur
   - Ajout et personnalisation de texte
   - Édition en temps réel avec aperçu instantané
-  - Partage du même
+  - Partage du meme
   ~ Sauvegarde des mèmes dans votre galerie
 
 - **Sécurité**
