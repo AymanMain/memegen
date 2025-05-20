@@ -8,12 +8,8 @@ Une application web moderne permettant de créer, modifier et partager des mème
   - Upload d'images depuis votre ordinateur
   - Ajout et personnalisation de texte
   - Édition en temps réel avec aperçu instantané
+  - Partage du même
   ~ Sauvegarde des mèmes dans votre galerie
-
-- **Galerie Personnelle**
-  - Visualisation de vos mèmes créés
-  - Téléchargement des mèmes
-  ~ Gestion de vos créations
 
 - **Sécurité**
   - Authentification sécurisée
@@ -25,9 +21,10 @@ Une application web moderne permettant de créer, modifier et partager des mème
 - Next.js 14
 - React
 - TailwindCSS
-- Firebase (Auth & Storage)
+- Firebase (Auth)
 - MongoDB
 - Konva.js
+- Imgur API (Storage)
 
 ## 🛠️ Installation
 

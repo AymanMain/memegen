@@ -5,7 +5,7 @@ import { Stage, Layer, Image as KonvaImage, Text, Transformer } from 'react-konv
 import { KonvaEventObject } from 'konva/lib/Node';
 import { useRouter } from 'next/navigation';
 import { useStore, UploadedImage } from '@/store/useStore';
-import { Download, Save, Share2, Type, Image as ImageIcon } from 'lucide-react';
+import { Download, Save, Share2, Type, Image as ImageIcon, X, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
 import TextControls from './TextControls';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -35,6 +35,99 @@ interface ImageSize {
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
 
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  memeUrl: string;
+  onDownload: () => void;
+}
+
+function ShareModal({ isOpen, onClose, memeUrl, onDownload }: ShareModalProps) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(memeUrl);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Erreur lors de la copie du lien:', err);
+    }
+  };
+
+  const handleShare = (platform: 'twitter' | 'facebook') => {
+    const text = encodeURIComponent(`Découvrez ce mème créé avec Meme Generator !`);
+    const url = encodeURIComponent(memeUrl);
+
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    };
+
+    window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Partager votre mème</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Social share buttons */}
+          <div className="flex space-x-4">
+            <button
+              onClick={() => handleShare('twitter')}
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#1DA1F2] text-white rounded-lg hover:bg-[#1a8cd8] transition-colors"
+            >
+              <Twitter className="h-5 w-5" />
+              <span>Twitter</span>
+            </button>
+            <button
+              onClick={() => handleShare('facebook')}
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#4267B2] text-white rounded-lg hover:bg-[#365899] transition-colors"
+            >
+              <Facebook className="h-5 w-5" />
+              <span>Facebook</span>
+            </button>
+          </div>
+
+          {/* Copy link */}
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={memeUrl}
+              readOnly
+              className="flex-1 px-3 py-2 border rounded-lg text-sm"
+            />
+            <button
+              onClick={handleCopyLink}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              {isCopied ? 'Copié !' : <LinkIcon className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/* Download button */}
+          <button
+            onClick={onDownload}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Download className="h-5 w-5" />
+            <span>Télécharger</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MemeEditor() {
   const { uploadedImage } = useStore();
   const [image, status] = useImage(uploadedImage ? `/api/proxy?url=${encodeURIComponent(uploadedImage.url)}` : '');
@@ -51,6 +144,8 @@ export default function MemeEditor() {
   const transformerRef = useRef<any>(null);
   const router = useRouter();
   const { user } = useStore();
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
   // Calculate image size to fit canvas while maintaining aspect ratio
   useEffect(() => {
@@ -273,12 +368,60 @@ export default function MemeEditor() {
 
   // Partage du mème
   const handleShare = useCallback(async () => {
-    if (stageRef.current) {
-      const dataURL = stageRef.current.toDataURL();
-      // TODO: Implémenter le partage
-      console.log('Partage du mème...', dataURL);
+    if (!stageRef.current || !image) {
+      setError('Impossible de partager le mème. Veuillez réessayer.');
+      return;
     }
-  }, []);
+
+    try {
+      // Get the stage data URL
+      const dataURL = stageRef.current.toDataURL({
+        pixelRatio: 2,
+        mimeType: 'image/png',
+        quality: 1,
+        width: imageSize.width,
+        height: imageSize.height,
+        x: imageSize.x,
+        y: imageSize.y,
+      });
+
+      // Convert to blob
+      const response = await fetch(dataURL);
+      const blob = await response.blob();
+
+      // Upload to Imgur for sharing
+      const { url: imageUrl, error: uploadError } = await uploadFileToImgur(
+        blob,
+        `Mème ${new Date().toLocaleDateString('fr-FR')}`
+      );
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Try to use Web Share API first
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Mon mème créé avec Meme Generator',
+            text: 'Découvrez ce mème que j\'ai créé !',
+            url: imageUrl,
+          });
+          return;
+        } catch (err) {
+          // If Web Share API fails, fall back to custom share modal
+          console.log('Web Share API failed, falling back to custom share modal');
+        }
+      }
+
+      // Fall back to custom share modal
+      setShareUrl(imageUrl);
+      setIsShareModalOpen(true);
+    } catch (err) {
+      console.error('Share error:', err);
+      setError('Erreur lors du partage. Veuillez réessayer.');
+    }
+  }, [image, imageSize]);
 
   // Récupération de l'élément sélectionné
   const selectedElement = textElements.find((el) => el.id === selectedId) || null;
@@ -438,6 +581,14 @@ export default function MemeEditor() {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        memeUrl={shareUrl}
+        onDownload={handleDownload}
+      />
     </div>
   );
 } 
