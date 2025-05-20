@@ -4,13 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Transformer } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { useRouter } from 'next/navigation';
-import { useStore, UploadedImage } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
 import { Download, Save, Share2, Type, Image as ImageIcon, X, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
 import TextControls from './TextControls';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { uploadFileToImgur } from '@/lib/imgur';
 import useImage from 'use-image';
+import { Stage as StageType } from 'konva/lib/Stage';
+import { Transformer as TransformerType } from 'konva/lib/Transformer';
 
 // Types pour les éléments de texte
 interface TextElement {
@@ -140,8 +142,8 @@ export default function MemeEditor() {
     x: 0,
     y: 0
   });
-  const stageRef = useRef<any>(null);
-  const transformerRef = useRef<any>(null);
+  const stageRef = useRef<StageType>(null);
+  const transformerRef = useRef<TransformerType>(null);
   const router = useRouter();
   const { user } = useStore();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -181,34 +183,11 @@ export default function MemeEditor() {
       setTextElements((elements) =>
         elements.map((el) => ({ ...el, isSelected: false }))
       );
-      if (transformerRef.current) {
-        transformerRef.current.nodes([]);
-        transformerRef.current.getLayer().batchDraw();
+      const transformer = transformerRef.current;
+      if (transformer) {
+        transformer.nodes([]);
+        transformer.getLayer()?.batchDraw();
       }
-    }
-  }, []);
-
-  // Gestion de la sélection des éléments
-  const handleSelect = useCallback((e: KonvaEventObject<MouseEvent>) => {
-    const clickedOnEmpty = e.target === e.target.getStage();
-    if (clickedOnEmpty) {
-      setSelectedId(null);
-      setTextElements((elements) =>
-        elements.map((el) => ({ ...el, isSelected: false }))
-      );
-      return;
-    }
-
-    const clickedOnText = e.target.getType() === 'Text';
-    if (clickedOnText) {
-      const id = e.target.id();
-      setSelectedId(id);
-      setTextElements((elements) =>
-        elements.map((el) => ({
-          ...el,
-          isSelected: el.id === id,
-        }))
-      );
     }
   }, []);
 

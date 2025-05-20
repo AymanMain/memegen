@@ -1,13 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import FileUpload from '@/components/FileUpload';
 import { Sparkles, Image as ImageIcon, Edit, Share2 } from 'lucide-react';
 
 export default function Home() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

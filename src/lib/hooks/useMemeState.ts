@@ -1,5 +1,5 @@
 import { useReducer, useCallback } from 'react';
-import { Meme, MemeState, MemeAction, MemeHistory, MemeTemplate } from '@/models/meme';
+import { Meme, MemeState, MemeAction, MemeTemplate } from '@/models/meme';
 
 const initialState: MemeState = {
   currentMeme: {

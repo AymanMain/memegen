@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const [, mimeType, base64Data] = matches;
+    const [, , base64Data] = matches;
 
     // Upload to Imgur
     const response = await fetch('https://api.imgur.com/3/image', {

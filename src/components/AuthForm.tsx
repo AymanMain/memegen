@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase';
 
 export default function AuthForm() {
@@ -13,7 +14,6 @@ export default function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,29 +27,31 @@ export default function AuthForm() {
         await createUserWithEmailAndPassword(auth, email, password);
       }
       router.replace('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Auth error:', err);
       let errorMessage = 'Une erreur est survenue';
       
-      switch (err.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'Adresse email invalide';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'Ce compte a été désactivé';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'Aucun compte trouvé avec cette adresse email';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Mot de passe incorrect';
-          break;
-        case 'auth/email-already-in-use':
-          errorMessage = 'Cette adresse email est déjà utilisée';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
-          break;
+      if (err instanceof FirebaseError) {
+        switch (err.code) {
+          case 'auth/invalid-email':
+            errorMessage = 'Adresse email invalide';
+            break;
+          case 'auth/user-disabled':
+            errorMessage = 'Ce compte a été désactivé';
+            break;
+          case 'auth/user-not-found':
+            errorMessage = 'Aucun compte trouvé avec cette adresse email';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = 'Mot de passe incorrect';
+            break;
+          case 'auth/email-already-in-use':
+            errorMessage = 'Cette adresse email est déjà utilisée';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+            break;
+        }
       }
       
       setError(errorMessage);
@@ -66,7 +68,7 @@ export default function AuthForm() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.replace('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Google sign-in error:', err);
       setError('Erreur lors de la connexion avec Google');
     } finally {

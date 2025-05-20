@@ -3,14 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Download, Share2, Trash2, Edit2 } from 'lucide-react';
+import { Share2, Trash2, Edit2, Download } from 'lucide-react';
 import { MemeTemplate } from '@/store/useStore';
 import ShareModal from './ShareModal';
 
 interface MemeGridProps {
   memes: MemeTemplate[];
   onDelete: (id: string) => Promise<void>;
-  onShare: (id: string) => Promise<void>;
   onDownload: (id: string) => Promise<void>;
   isLoading?: boolean;
 }
@@ -18,7 +17,6 @@ interface MemeGridProps {
 export default function MemeGrid({
   memes,
   onDelete,
-  onShare,
   onDownload,
   isLoading = false,
 }: MemeGridProps) {
@@ -33,10 +31,6 @@ export default function MemeGrid({
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const handleShare = (meme: MemeTemplate) => {
-    setSelectedMeme(meme);
   };
 
   const handleDownload = async (id: string) => {
@@ -103,11 +97,11 @@ export default function MemeGrid({
                   <Edit2 className="h-5 w-5 text-gray-700" />
                 </button>
                 <button
-                  onClick={() => handleShare(meme)}
+                  onClick={() => handleDownload(meme.id)}
                   className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-                  title="Partager"
+                  title="Télécharger"
                 >
-                  <Share2 className="h-5 w-5 text-gray-700" />
+                  <Download className="h-5 w-5 text-gray-700" />
                 </button>
                 <button
                   onClick={() => handleDelete(meme.id)}

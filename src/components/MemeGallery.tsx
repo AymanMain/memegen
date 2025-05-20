@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs, deleteDoc, doc, where, limit, startAfter } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { deleteFileFromImgur } from '@/lib/imgur';
-import { Trash2, Edit, Share2, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, Share2, SortAsc, SortDesc } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import ShareModal from './ShareModal';
 
@@ -30,7 +30,6 @@ export default function MemeGallery() {
   const [selectedMeme, setSelectedMeme] = useState<typeof memes[0] | null>(null);
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
-  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState<any>(null);
 
@@ -92,7 +91,6 @@ export default function MemeGallery() {
 
   // Initial fetch
   useEffect(() => {
-    setPage(1);
     setLastDoc(null);
     fetchMemes(true);
   }, [filter, sortBy]);
@@ -100,7 +98,6 @@ export default function MemeGallery() {
   // Load more
   const loadMore = () => {
     if (!hasMore || memesLoading) return;
-    setPage(p => p + 1);
     fetchMemes();
   };
 

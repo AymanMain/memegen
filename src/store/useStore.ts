@@ -78,7 +78,7 @@ export interface AppState {
 // Création du store avec persistance
 export const useStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // État initial
       user: null,
       isAuthenticated: false,
