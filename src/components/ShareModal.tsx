@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { X, Twitter, Facebook, Link as LinkIcon, Download } from 'lucide-react';
 import { MemeTemplate } from '@/store/useStore';
 
@@ -63,11 +64,13 @@ export default function ShareModal({ meme, onClose, onDownload }: ShareModalProp
         {/* Contenu */}
         <div className="p-6">
           {/* Aperçu du mème */}
-          <div className="mb-6">
-            <img
+          <div className="mb-6 relative h-48">
+            <Image
               src={meme.imageUrl}
               alt={meme.name}
-              className="w-full h-48 object-cover rounded-lg"
+              fill
+              className="object-cover rounded-lg"
+              sizes="(max-width: 768px) 100vw, 768px"
             />
           </div>
 

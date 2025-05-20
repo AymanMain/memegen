@@ -66,7 +66,7 @@ export default function FileUpload() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Une erreur est survenue lors de l\'upload'
+          : 'Une erreur est survenue lors de l&apos;upload'
       );
     } finally {
       setIsUploading(false);

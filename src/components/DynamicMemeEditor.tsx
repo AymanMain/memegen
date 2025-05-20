@@ -7,7 +7,7 @@ const MemeEditor = dynamic(() => import('./MemeEditor'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-full">
-      <div className="text-gray-500">Chargement de l'éditeur...</div>
+      <div className="text-gray-500">Chargement de l&apos;éditeur...</div>
     </div>
   ),
 });

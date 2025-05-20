@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Transformer } from 'react-konva';
-import { KonvaEventObject } from 'konva/lib/Node';
+import type { KonvaEventObject, Box } from 'react-konva';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { Download, Save, Share2, Type, Image as ImageIcon, X, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
@@ -11,8 +11,6 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { uploadFileToImgur } from '@/lib/imgur';
 import useImage from 'use-image';
-import { Stage as StageType } from 'konva/lib/Stage';
-import { Transformer as TransformerType } from 'konva/lib/Transformer';
 
 // Types pour les éléments de texte
 interface TextElement {
@@ -142,8 +140,8 @@ export default function MemeEditor() {
     x: 0,
     y: 0
   });
-  const stageRef = useRef<StageType>(null);
-  const transformerRef = useRef<TransformerType>(null);
+  const stageRef = useRef<Stage>(null);
+  const transformerRef = useRef<Transformer>(null);
   const router = useRouter();
   const { user } = useStore();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -247,11 +245,11 @@ export default function MemeEditor() {
 
   // Gestion du redimensionnement
   useEffect(() => {
-    if (selectedId && transformerRef.current) {
+    if (selectedId && transformerRef.current && stageRef.current) {
       const selectedNode = stageRef.current.findOne(`#${selectedId}`);
       if (selectedNode) {
         transformerRef.current.nodes([selectedNode]);
-        transformerRef.current.getLayer().batchDraw();
+        transformerRef.current.getLayer()?.batchDraw();
       }
     }
   }, [selectedId]);
@@ -312,7 +310,6 @@ export default function MemeEditor() {
       const blob = await response.blob();
 
       // Générer un nom unique pour le mème
-      const memeId = Date.now().toString();
       const memeName = `Mème ${new Date().toLocaleDateString('fr-FR')}`;
 
       // Upload de l'image dans Imgur
@@ -332,15 +329,15 @@ export default function MemeEditor() {
         deleteHash,
         createdAt: serverTimestamp(),
         createdBy: user.uid,
-        textElements: textElements.map(({ id, ...element }) => element), // Exclure l'ID local
+        textElements: textElements.map(({ ...element }) => element), // Remove id from destructuring
       };
 
       await addDoc(collection(db, 'memes'), memeData);
 
       // Redirection vers la galerie
       router.push('/gallery');
-    } catch (err) {
-      console.error('Save error:', err);
+    } catch (error) {
+      console.error('Save error:', error);
       setError('Erreur lors de la sauvegarde. Veuillez réessayer.');
     }
   }, [stageRef, user, image, imageSize, textElements, router]);
@@ -396,8 +393,8 @@ export default function MemeEditor() {
       // Fall back to custom share modal
       setShareUrl(imageUrl);
       setIsShareModalOpen(true);
-    } catch (err) {
-      console.error('Share error:', err);
+    } catch (error) {
+      console.error('Share error:', error);
       setError('Erreur lors du partage. Veuillez réessayer.');
     }
   }, [image, imageSize]);
@@ -537,8 +534,7 @@ export default function MemeEditor() {
                         {/* Transformer */}
                         <Transformer
                           ref={transformerRef}
-                          boundBoxFunc={(oldBox, newBox) => {
-                            // Limit the size of the text box
+                          boundBoxFunc={(oldBox: Box, newBox: Box) => {
                             const minSize = 20;
                             if (newBox.width < minSize || newBox.height < minSize) {
                               return oldBox;

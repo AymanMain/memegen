@@ -1,24 +1,17 @@
 import { Metadata } from 'next';
 import MemeViewer from '@/components/MemeViewer';
 
-type Props = {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  console.log(id);
   return {
-    title: 'View Meme | Meme Generator',
-    description: 'View and share your meme with the world!',
-    openGraph: {
-      title: 'View Meme | Meme Generator',
-      description: 'View and share your meme with the world!',
-      type: 'website',
-    },
+    title: 'Meme Viewer - MemeGen',
+    description: 'View and share your meme',
   };
 }
 
 // Page component
-export default function MemePage({ params }: Props) {
-  return <MemeViewer id={params.id} />;
+export default async function MemePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <MemeViewer id={id} />;
 }

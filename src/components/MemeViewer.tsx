@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase';
 import { Meme } from '@/models/meme';
 import { toast } from 'react-hot-toast';
 import ShareDialog from '@/components/ShareDialog';
+import Image from 'next/image';
 
 interface MemeViewerProps {
   id: string;
@@ -89,11 +90,16 @@ export default function MemeViewer({ id }: MemeViewerProps) {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Meme Image */}
           <div className="relative aspect-video">
-            <img
-              src={meme.imageUrl}
-              alt={`Meme: ${meme.topText} ${meme.bottomText}`}
-              className="w-full h-full object-contain"
-            />
+            {meme.imageUrl && (
+              <Image
+                src={meme.imageUrl}
+                alt={`Meme: ${meme.topText} ${meme.bottomText}`}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            )}
           </div>
 
           {/* Meme Text Overlay */}

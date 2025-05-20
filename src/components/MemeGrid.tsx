@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Share2, Trash2, Edit2, Download } from 'lucide-react';
+import { Trash2, Edit2, Download } from 'lucide-react';
 import { MemeTemplate } from '@/store/useStore';
 import ShareModal from './ShareModal';
 

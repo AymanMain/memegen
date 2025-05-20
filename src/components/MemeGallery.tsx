@@ -3,12 +3,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/firebase';
-import { collection, query, orderBy, getDocs, deleteDoc, doc, where, limit, startAfter } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, deleteDoc, doc, where, limit, startAfter, DocumentSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { deleteFileFromImgur } from '@/lib/imgur';
 import { Trash2, Edit, Share2, SortAsc, SortDesc } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import ShareModal from './ShareModal';
+import Image from 'next/image';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -31,7 +32,7 @@ export default function MemeGallery() {
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
   const [hasMore, setHasMore] = useState(true);
-  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null);
 
   // Fetch memes with pagination
   const fetchMemes = useCallback(async (isInitial = false) => {
@@ -93,7 +94,7 @@ export default function MemeGallery() {
   useEffect(() => {
     setLastDoc(null);
     fetchMemes(true);
-  }, [filter, sortBy]);
+  }, [filter, sortBy, fetchMemes]);
 
   // Load more
   const loadMore = () => {
@@ -234,11 +235,13 @@ export default function MemeGallery() {
           >
             {/* Meme Image */}
             <div className="aspect-square relative">
-              <img
+              <Image
                 src={meme.imageUrl}
                 alt={meme.name}
-                className="w-full h-full object-cover"
-                loading="lazy"
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                priority={false}
               />
               
               {/* Overlay with actions */}

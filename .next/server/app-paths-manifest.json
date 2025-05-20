@@ -1,12 +1,12 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/imgur/delete/route": "app/api/imgur/delete/route.js",
-  "/api/proxy/route": "app/api/proxy/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/imgur/upload/route": "app/api/imgur/upload/route.js",
+  "/api/proxy/route": "app/api/proxy/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/auth/page": "app/auth/page.js",
   "/gallery/page": "app/gallery/page.js",
-  "/meme/[id]/page": "app/meme/[id]/page.js",
+  "/page": "app/page.js",
+  "/auth/page": "app/auth/page.js",
   "/editor/page": "app/editor/page.js",
-  "/page": "app/page.js"
+  "/meme/[id]/page": "app/meme/[id]/page.js"
 }
