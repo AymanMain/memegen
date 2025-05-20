@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.3",
+    "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "canvas": "^3.1.0",
     "firebase": "^11.7.3",
@@ -21,7 +21,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
+    "react-hot-toast": "^2.5.2",
     "react-konva": "^19.0.3",
+    "react-share": "^5.2.2",
     "use-image": "^1.1.1",
     "zustand": "^5.0.4"
   },

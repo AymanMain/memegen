@@ -1,8 +1,6 @@
 {
-  "/api/imgur/upload/route": "app/api/imgur/upload/route.js",
   "/api/proxy/route": "app/api/proxy/route.js",
+  "/api/imgur/upload/route": "app/api/imgur/upload/route.js",
   "/page": "app/page.js",
-  "/auth/page": "app/auth/page.js",
-  "/editor/page": "app/editor/page.js",
-  "/gallery/page": "app/gallery/page.js"
+  "/editor/page": "app/editor/page.js"
 }

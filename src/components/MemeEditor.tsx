@@ -190,31 +190,20 @@ export default function MemeEditor() {
     }
 
     try {
-      // Create a temporary canvas to draw the stage
-      const tempCanvas = document.createElement('canvas');
-      const tempContext = tempCanvas.getContext('2d');
-      if (!tempContext) {
-        throw new Error('Could not get canvas context');
-      }
-
-      // Set canvas size to match the stage
-      tempCanvas.width = stageRef.current.width();
-      tempCanvas.height = stageRef.current.height();
-
-      // Draw the image first
-      tempContext.drawImage(image, 0, 0);
-
-      // Draw text elements
-      textElements.forEach((element) => {
-        tempContext.font = `${element.fontSize}px ${element.fontFamily}`;
-        tempContext.fillStyle = element.fill;
-        tempContext.fillText(element.text, element.x, element.y);
+      // Get the stage data URL with proper dimensions
+      const dataURL = stageRef.current.toDataURL({
+        pixelRatio: 2, // Higher quality
+        mimeType: 'image/png',
+        quality: 1,
+        width: imageSize.width,
+        height: imageSize.height,
+        x: imageSize.x,
+        y: imageSize.y,
       });
 
-      // Convert to data URL and download
-      const dataURL = tempCanvas.toDataURL('image/png');
+      // Create download link
       const link = document.createElement('a');
-      link.download = 'mon-meme.png';
+      link.download = `meme-${Date.now()}.png`;
       link.href = dataURL;
       document.body.appendChild(link);
       link.click();
@@ -223,7 +212,7 @@ export default function MemeEditor() {
       console.error('Download error:', err);
       setError('Erreur lors du téléchargement. Veuillez réessayer.');
     }
-  }, [image, textElements]);
+  }, [image, imageSize]);
 
   // Sauvegarde du mème
   const handleSave = useCallback(async () => {
@@ -233,34 +222,20 @@ export default function MemeEditor() {
     }
 
     try {
-      // Create a temporary canvas to draw the stage
-      const tempCanvas = document.createElement('canvas');
-      const tempContext = tempCanvas.getContext('2d');
-      if (!tempContext) {
-        throw new Error('Could not get canvas context');
-      }
-
-      // Set canvas size to match the stage
-      tempCanvas.width = stageRef.current.width();
-      tempCanvas.height = stageRef.current.height();
-
-      // Draw the image first
-      tempContext.drawImage(image, 0, 0);
-
-      // Draw text elements
-      textElements.forEach((element) => {
-        tempContext.font = `${element.fontSize}px ${element.fontFamily}`;
-        tempContext.fillStyle = element.fill;
-        tempContext.fillText(element.text, element.x, element.y);
+      // Get the stage data URL with proper dimensions
+      const dataURL = stageRef.current.toDataURL({
+        pixelRatio: 2,
+        mimeType: 'image/png',
+        quality: 1,
+        width: imageSize.width,
+        height: imageSize.height,
+        x: imageSize.x,
+        y: imageSize.y,
       });
 
-      // Convert to blob
-      const blob = await new Promise<Blob>((resolve) => {
-        tempCanvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else throw new Error('Could not create blob');
-        }, 'image/png');
-      });
+      // Convert data URL to blob
+      const response = await fetch(dataURL);
+      const blob = await response.blob();
 
       // Générer un nom unique pour le mème
       const memeId = Date.now().toString();
@@ -294,7 +269,7 @@ export default function MemeEditor() {
       console.error('Save error:', err);
       setError('Erreur lors de la sauvegarde. Veuillez réessayer.');
     }
-  }, [stageRef, user, image, textElements, router]);
+  }, [stageRef, user, image, imageSize, textElements, router]);
 
   // Partage du mème
   const handleShare = useCallback(async () => {
