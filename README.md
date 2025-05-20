@@ -1,4 +1,4 @@
-# 🎨 Générateur de Mèmes
+# 🎨 Générateur de Memes
 
 Une application web moderne permettant de créer, modifier et partager des memes facilement.
 [Lien de l'Application](https://memegen-ncpm.vercel.app/)
