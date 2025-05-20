@@ -21,8 +21,8 @@ export default function EditorPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       <main className="flex-1 flex flex-col">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden flex-1 flex flex-col">
             <div className="p-4 border-b">
               <h1 className="text-2xl font-bold text-gray-900">
                 Éditeur de Mème
@@ -31,12 +31,13 @@ export default function EditorPage() {
                 Personnalisez votre mème en ajoutant du texte et en ajustant sa position
               </p>
             </div>
-            <div className="h-[calc(100vh-16rem)]">
+            <div className="flex-1 overflow-auto">
               <DynamicMemeEditor />
             </div>
           </div>
         </div>
       </main>
+
     </div>
   );
 } 

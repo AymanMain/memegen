@@ -6,12 +6,14 @@ import { useDropzone } from 'react-dropzone';
 import { Upload, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { uploadFileToImgur } from '@/lib/imgur';
 import { useAuth } from '@/lib/firebase';
+import { useStore } from '@/store/useStore';
 
 export default function FileUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { user } = useAuth();
+  const { setUploadedImage } = useStore();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (!user) {
@@ -47,8 +49,18 @@ export default function FileUpload() {
         throw uploadError;
       }
 
-      // Redirect to editor with the uploaded image URL
-      router.push(`/editor?image=${encodeURIComponent(url)}`);
+      // Set the uploaded image in the store
+      setUploadedImage({
+        id: Date.now().toString(),
+        url,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        createdAt: new Date().toISOString(),
+      });
+
+      // Redirect to editor
+      router.push('/editor');
     } catch (err) {
       console.error('Upload error:', err);
       setError(
@@ -59,7 +71,7 @@ export default function FileUpload() {
     } finally {
       setIsUploading(false);
     }
-  }, [user, router]);
+  }, [user, router, setUploadedImage]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

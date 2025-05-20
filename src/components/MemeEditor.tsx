@@ -1,15 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Stage, Layer, Image, Text, Transformer } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Text, Transformer } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/store/useStore';
+import { useStore, UploadedImage } from '@/store/useStore';
 import { Download, Save, Share2, Type, Image as ImageIcon } from 'lucide-react';
 import TextControls from './TextControls';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { uploadFileToImgur } from '@/lib/imgur';
+import useImage from 'use-image';
 
 // Types pour les éléments de texte
 interface TextElement {
@@ -24,26 +25,73 @@ interface TextElement {
   isSelected: boolean;
 }
 
+interface ImageSize {
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
+
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
+
 export default function MemeEditor() {
   const { uploadedImage } = useStore();
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [image, status] = useImage(uploadedImage ? `/api/proxy?url=${encodeURIComponent(uploadedImage.url)}` : '');
   const [textElements, setTextElements] = useState<TextElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [imageSize, setImageSize] = useState<ImageSize>({ 
+    width: CANVAS_WIDTH, 
+    height: CANVAS_HEIGHT,
+    x: 0,
+    y: 0
+  });
   const stageRef = useRef<any>(null);
   const transformerRef = useRef<any>(null);
   const router = useRouter();
   const { user } = useStore();
 
-  // Chargement de l'image
+  // Calculate image size to fit canvas while maintaining aspect ratio
   useEffect(() => {
-    if (uploadedImage) {
-      const img = new window.Image();
-      img.src = URL.createObjectURL(uploadedImage);
-      img.onload = () => {
-        setImage(img);
-      };
+    if (image) {
+      const imageAspectRatio = image.width / image.height;
+      const canvasAspectRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
+      let width, height;
+
+      // Always scale to fit the smaller dimension
+      if (imageAspectRatio > canvasAspectRatio) {
+        // Image is wider than canvas - fit to height
+        height = CANVAS_HEIGHT;
+        width = height * imageAspectRatio;
+      } else {
+        // Image is taller than canvas - fit to width
+        width = CANVAS_WIDTH;
+        height = width / imageAspectRatio;
+      }
+
+      // Center the image
+      const x = (CANVAS_WIDTH - width) / 2;
+      const y = (CANVAS_HEIGHT - height) / 2;
+
+      setImageSize({ width, height, x, y });
     }
-  }, [uploadedImage]);
+  }, [image]);
+
+  // Handle stage click to deselect text
+  const handleStageClick = useCallback((e: KonvaEventObject<MouseEvent>) => {
+    const clickedOnEmpty = e.target === e.target.getStage();
+    if (clickedOnEmpty) {
+      setSelectedId(null);
+      setTextElements((elements) =>
+        elements.map((el) => ({ ...el, isSelected: false }))
+      );
+      if (transformerRef.current) {
+        transformerRef.current.nodes([]);
+        transformerRef.current.getLayer().batchDraw();
+      }
+    }
+  }, []);
 
   // Gestion de la sélection des éléments
   const handleSelect = useCallback((e: KonvaEventObject<MouseEvent>) => {
@@ -136,28 +184,83 @@ export default function MemeEditor() {
 
   // Téléchargement du mème
   const handleDownload = useCallback(() => {
-    if (stageRef.current) {
-      const dataURL = stageRef.current.toDataURL();
+    if (!stageRef.current || !image) {
+      setError('Impossible de télécharger le mème. Veuillez réessayer.');
+      return;
+    }
+
+    try {
+      // Create a temporary canvas to draw the stage
+      const tempCanvas = document.createElement('canvas');
+      const tempContext = tempCanvas.getContext('2d');
+      if (!tempContext) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Set canvas size to match the stage
+      tempCanvas.width = stageRef.current.width();
+      tempCanvas.height = stageRef.current.height();
+
+      // Draw the image first
+      tempContext.drawImage(image, 0, 0);
+
+      // Draw text elements
+      textElements.forEach((element) => {
+        tempContext.font = `${element.fontSize}px ${element.fontFamily}`;
+        tempContext.fillStyle = element.fill;
+        tempContext.fillText(element.text, element.x, element.y);
+      });
+
+      // Convert to data URL and download
+      const dataURL = tempCanvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = 'mon-meme.png';
       link.href = dataURL;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } catch (err) {
+      console.error('Download error:', err);
+      setError('Erreur lors du téléchargement. Veuillez réessayer.');
     }
-  }, []);
+  }, [image, textElements]);
 
   // Sauvegarde du mème
   const handleSave = useCallback(async () => {
-    if (!stageRef.current || !user) return;
+    if (!stageRef.current || !user || !image) {
+      setError('Impossible de sauvegarder le mème. Veuillez réessayer.');
+      return;
+    }
 
     try {
-      // Convertir le stage en image
-      const dataURL = stageRef.current.toDataURL();
-      
-      // Convertir le dataURL en Blob
-      const response = await fetch(dataURL);
-      const blob = await response.blob();
+      // Create a temporary canvas to draw the stage
+      const tempCanvas = document.createElement('canvas');
+      const tempContext = tempCanvas.getContext('2d');
+      if (!tempContext) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Set canvas size to match the stage
+      tempCanvas.width = stageRef.current.width();
+      tempCanvas.height = stageRef.current.height();
+
+      // Draw the image first
+      tempContext.drawImage(image, 0, 0);
+
+      // Draw text elements
+      textElements.forEach((element) => {
+        tempContext.font = `${element.fontSize}px ${element.fontFamily}`;
+        tempContext.fillStyle = element.fill;
+        tempContext.fillText(element.text, element.x, element.y);
+      });
+
+      // Convert to blob
+      const blob = await new Promise<Blob>((resolve) => {
+        tempCanvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else throw new Error('Could not create blob');
+        }, 'image/png');
+      });
 
       // Générer un nom unique pour le mème
       const memeId = Date.now().toString();
@@ -188,10 +291,10 @@ export default function MemeEditor() {
       // Redirection vers la galerie
       router.push('/gallery');
     } catch (err) {
-      console.error('Erreur lors de la sauvegarde du mème:', err);
-      alert('Impossible de sauvegarder le mème. Veuillez réessayer.');
+      console.error('Save error:', err);
+      setError('Erreur lors de la sauvegarde. Veuillez réessayer.');
     }
-  }, [stageRef, user, textElements, router]);
+  }, [stageRef, user, image, textElements, router]);
 
   // Partage du mème
   const handleShare = useCallback(async () => {
@@ -206,109 +309,158 @@ export default function MemeEditor() {
   const selectedElement = textElements.find((el) => el.id === selectedId) || null;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Barre d'outils */}
-      <div className="bg-white p-4 border-b flex items-center justify-between">
-        <div className="flex space-x-4">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-4 mt-4" role="alert">
+          <span className="block sm:inline">{error}</span>
           <button
-            onClick={addText}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            onClick={() => setError(null)}
           >
-            <Type className="h-5 w-5 mr-2" />
-            Ajouter du texte
+            <span className="sr-only">Dismiss</span>
+            <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Close</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
           </button>
         </div>
-        <div className="flex space-x-4">
-          <button
-            onClick={handleSave}
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            <Save className="h-5 w-5 mr-2" />
-            Sauvegarder
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            Télécharger
-          </button>
-          <button
-            onClick={handleShare}
-            className="flex items-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
-          >
-            <Share2 className="h-5 w-5 mr-2" />
-            Partager
-          </button>
+      )}
+
+      {/* Loading state */}
+      {status === 'loading' && (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B6B]"></div>
+        </div>
+      )}
+
+      {/* Fixed toolbar */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-4">
+            <button
+              onClick={addText}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white rounded-lg hover:from-[#FF8E8E] hover:to-[#FF6B6B] transition-all duration-200 shadow-sm"
+            >
+              <Type className="h-5 w-5 mr-2" />
+              Ajouter du texte
+            </button>
+          </div>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleSave}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-[#4ECDC4] to-[#45B7AF] text-white rounded-lg hover:from-[#45B7AF] hover:to-[#4ECDC4] transition-all duration-200 shadow-sm"
+            >
+              <Save className="h-5 w-5 mr-2" />
+              Sauvegarder
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-600 transition-all duration-200 shadow-sm"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Télécharger
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-[#FFD93D] to-[#FFC107] text-white rounded-lg hover:from-[#FFC107] hover:to-[#FFD93D] transition-all duration-200 shadow-sm"
+            >
+              <Share2 className="h-5 w-5 mr-2" />
+              Partager
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Contrôles de texte */}
-      <TextControls
-        selectedElement={selectedElement}
-        onUpdate={updateTextProperties}
-        onDelete={deleteSelectedText}
-      />
+      {/* Text controls */}
+      <div className="sticky top-[73px] z-40 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+        <TextControls
+          selectedElement={selectedElement}
+          onUpdate={updateTextProperties}
+          onDelete={deleteSelectedText}
+        />
+      </div>
 
-      {/* Zone d'édition */}
-      <div className="flex-1 bg-gray-100 p-4 overflow-auto">
-        <div className="bg-white rounded-lg shadow-lg p-4 mx-auto" style={{ maxWidth: '800px' }}>
-          {image ? (
-            <Stage
-              ref={stageRef}
-              width={image.width}
-              height={image.height}
-              onMouseDown={handleSelect}
-              className="mx-auto"
-            >
-              <Layer>
-                {/* Image de fond */}
-                <Image
-                  image={image}
-                  width={image.width}
-                  height={image.height}
-                />
+      {/* Editor area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-full p-4">
+          <div className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-xl shadow-xl p-4 mx-auto max-w-4xl">
+            {image ? (
+              <div className="relative w-full" style={{ maxWidth: CANVAS_WIDTH, margin: '0 auto' }}>
+                <div className="relative" style={{ paddingBottom: `${(CANVAS_HEIGHT / CANVAS_WIDTH) * 100}%` }}>
+                  <div className="absolute inset-0 overflow-visible">
+                    <Stage
+                      ref={stageRef}
+                      width={CANVAS_WIDTH}
+                      height={CANVAS_HEIGHT}
+                      onMouseDown={handleStageClick}
+                      className="absolute inset-0 bg-white dark:bg-gray-900 rounded-lg shadow-lg"
+                      style={{ width: '100%', height: '100%' }}
+                    >
+                      <Layer>
+                        {/* Background image */}
+                        <KonvaImage
+                          image={image}
+                          width={imageSize.width}
+                          height={imageSize.height}
+                          x={imageSize.x}
+                          y={imageSize.y}
+                        />
 
-                {/* Éléments de texte */}
-                {textElements.map((textElement) => (
-                  <Text
-                    key={textElement.id}
-                    id={textElement.id}
-                    text={textElement.text}
-                    x={textElement.x}
-                    y={textElement.y}
-                    fontSize={textElement.fontSize}
-                    fontFamily={textElement.fontFamily}
-                    fill={textElement.fill}
-                    draggable={textElement.draggable}
-                    onDblClick={() => {
-                      const newText = prompt('Entrez votre texte:', textElement.text);
-                      if (newText) {
-                        updateText(textElement.id, newText);
-                      }
-                    }}
-                    onDragEnd={(e) => {
-                      setTextElements((elements) =>
-                        elements.map((el) =>
-                          el.id === textElement.id
-                            ? { ...el, x: e.target.x(), y: e.target.y() }
-                            : el
-                        )
-                      );
-                    }}
-                  />
-                ))}
+                        {/* Text elements */}
+                        {textElements.map((textElement) => (
+                          <Text
+                            key={textElement.id}
+                            id={textElement.id}
+                            text={textElement.text}
+                            x={textElement.x}
+                            y={textElement.y}
+                            fontSize={textElement.fontSize}
+                            fontFamily={textElement.fontFamily}
+                            fill={textElement.fill}
+                            draggable={textElement.draggable}
+                            onDblClick={() => {
+                              const newText = prompt('Entrez votre texte:', textElement.text);
+                              if (newText) {
+                                updateText(textElement.id, newText);
+                              }
+                            }}
+                            onDragEnd={(e) => {
+                              setTextElements((elements) =>
+                                elements.map((el) =>
+                                  el.id === textElement.id
+                                    ? { ...el, x: e.target.x(), y: e.target.y() }
+                                    : el
+                                )
+                              );
+                            }}
+                          />
+                        ))}
 
-                {/* Transformer pour le redimensionnement */}
-                <Transformer ref={transformerRef} />
-              </Layer>
-            </Stage>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <ImageIcon className="h-16 w-16 mb-4" />
-              <p>Aucune image sélectionnée</p>
-            </div>
-          )}
+                        {/* Transformer */}
+                        <Transformer
+                          ref={transformerRef}
+                          boundBoxFunc={(oldBox, newBox) => {
+                            // Limit the size of the text box
+                            const minSize = 20;
+                            if (newBox.width < minSize || newBox.height < minSize) {
+                              return oldBox;
+                            }
+                            return newBox;
+                          }}
+                        />
+                      </Layer>
+                    </Stage>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+                <ImageIcon className="h-16 w-16 mb-4" />
+                <p>Aucune image sélectionnée</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
